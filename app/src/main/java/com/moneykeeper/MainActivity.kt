@@ -8,17 +8,17 @@ import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.room.Room
-import com.moneykeeper.data.database.AppDatabase
-import com.moneykeeper.data.repository.FundsRepositoryImpl
-import com.moneykeeper.ui.screen.FundsScreen
-import com.moneykeeper.ui.theme.MoneyKeeperTheme
-import com.moneykeeper.ui.viewmodel.FundsViewModel
+import com.moneykeeper.core.data.database.AppDatabase
+import com.moneykeeper.core.data.repository.FundsRepositoryImpl
+import com.moneykeeper.feature.transactions.screen.FundsScreen
+import com.moneykeeper.core.ui.theme.MoneyKeeperTheme
+import com.moneykeeper.feature.transactions.viewmodel.FundsViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // Simple manual DI for the sake of the task
+        // Simple manual DI
         val db = Room.databaseBuilder(
             applicationContext,
             AppDatabase::class.java, "money-keeper-db"
@@ -31,6 +31,7 @@ class MainActivity : ComponentActivity() {
         )
         
         val viewModelFactory = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return FundsViewModel(repository) as T
             }

@@ -1,0 +1,70 @@
+package com.moneykeeper.core.data.repository
+
+import android.content.Context
+import com.moneykeeper.core.ui.R
+import com.moneykeeper.core.data.dao.CategoryDao
+import com.moneykeeper.core.data.dao.TransactionDao
+import com.moneykeeper.core.data.mapper.toDomain
+import com.moneykeeper.core.data.mapper.toEntity
+import com.moneykeeper.core.domain.model.Category
+import com.moneykeeper.core.domain.model.FinancialTransaction
+import com.moneykeeper.core.domain.repository.FundsRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+
+class FundsRepositoryImpl(
+    private val transactionDao: TransactionDao,
+    private val categoryDao: CategoryDao,
+    private val context: Context
+) : FundsRepository {
+
+    private val unknownCategoryName by lazy { context.getString(R.string.unknown_category) }
+
+    override fun getAllTransactions(): Flow<List<FinancialTransaction>> {
+        return combine(
+            transactionDao.getAllTransactions(),
+            categoryDao.getAllCategories()
+        ) { transactions, categories ->
+            val categoryMap = categories.associateBy { it.id }
+            transactions.map { entity ->
+                val categoryEntity = categoryMap[entity.categoryId]
+                val category = categoryEntity?.toDomain() ?: Category(name = unknownCategoryName)
+                entity.toDomain(category)
+            }
+        }
+    }
+
+    override suspend fun getTransactionById(id: Long): FinancialTransaction? {
+        val entity = transactionDao.getTransactionById(id) ?: return null
+        val categoryEntity = categoryDao.getCategoryById(entity.categoryId)
+        val category = categoryEntity?.toDomain() ?: Category(name = unknownCategoryName)
+        return entity.toDomain(category)
+    }
+
+    override suspend fun addTransaction(transaction: FinancialTransaction) {
+        transactionDao.insertTransaction(transaction.toEntity())
+    }
+
+    override suspend fun updateTransaction(transaction: FinancialTransaction) {
+        transactionDao.updateTransaction(transaction.toEntity())
+    }
+
+    override suspend fun deleteTransaction(transaction: FinancialTransaction) {
+        transactionDao.deleteTransaction(transaction.toEntity())
+    }
+
+    override fun getCategories(): Flow<List<Category>> {
+        return categoryDao.getAllCategories().map { list ->
+            list.map { it.toDomain() }
+        }
+    }
+
+    override suspend fun addCategory(category: Category) {
+        categoryDao.insertCategory(category.toEntity())
+    }
+
+    override suspend fun deleteCategory(category: Category) {
+        categoryDao.deleteCategory(category.toEntity())
+    }
+}
