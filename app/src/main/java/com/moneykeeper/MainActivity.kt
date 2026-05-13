@@ -26,7 +26,8 @@ class MainActivity : ComponentActivity() {
         
         val repository = FundsRepositoryImpl(
             transactionDao = db.transactionDao(),
-            categoryDao = db.categoryDao()
+            categoryDao = db.categoryDao(),
+            context = applicationContext
         )
         
         val viewModelFactory = object : ViewModelProvider.Factory {

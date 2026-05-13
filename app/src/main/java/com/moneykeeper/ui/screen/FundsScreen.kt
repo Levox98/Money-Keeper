@@ -13,6 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.moneykeeper.R
 import com.moneykeeper.domain.model.Category
 import com.moneykeeper.domain.model.FinancialTransaction
 import com.moneykeeper.domain.model.TransactionType
@@ -36,7 +38,7 @@ fun FundsScreen(viewModel: FundsViewModel) {
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Money Keeper") })
+            TopAppBar(title = { Text(stringResource(R.string.app_name)) })
         },
         floatingActionButton = {
             Column(horizontalAlignment = Alignment.End) {
@@ -44,10 +46,10 @@ fun FundsScreen(viewModel: FundsViewModel) {
                     onClick = { showAddCategoryDialog = true },
                     modifier = Modifier.padding(bottom = 8.dp),
                 ) {
-                    Text("Cat+")
+                    Text(stringResource(R.string.cat_plus))
                 }
                 FloatingActionButton(onClick = { showAddTransactionDialog = true }) {
-                    Icon(Icons.Default.Add, contentDescription = "Add Transaction")
+                    Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_transaction))
                 }
             }
         }
@@ -63,7 +65,7 @@ fun FundsScreen(viewModel: FundsViewModel) {
             Spacer(modifier = Modifier.height(24.dp))
             
             Text(
-                text = "Recent Transactions",
+                text = stringResource(R.string.recent_transactions),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -115,9 +117,9 @@ fun BalanceCard(balance: BigDecimal) {
             modifier = Modifier.padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Total Balance", style = MaterialTheme.typography.labelLarge)
+            Text(stringResource(R.string.total_balance), style = MaterialTheme.typography.labelLarge)
             Text(
-                text = "$balance ₽",
+                text = stringResource(R.string.currency_format, balance.toString()),
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.ExtraBold,
                 color = if (balance >= BigDecimal.ZERO) Color(0xFF2E7D32) else Color.Red
@@ -131,7 +133,8 @@ fun TransactionItem(
     transaction: FinancialTransaction,
     onDelete: (FinancialTransaction) -> Unit
 ) {
-    val dateFormat = remember { SimpleDateFormat("dd MMM, HH:mm", Locale.getDefault()) }
+    val dateFormatString = stringResource(R.string.date_format)
+    val dateFormat = remember(dateFormatString) { SimpleDateFormat(dateFormatString, Locale.getDefault()) }
     
     Card(
         modifier = Modifier
@@ -163,14 +166,19 @@ fun TransactionItem(
             }
             
             Row(verticalAlignment = Alignment.CenterVertically) {
+                val amountText = if (transaction.type == TransactionType.INCOME) {
+                    stringResource(R.string.income_format, transaction.amount.toString())
+                } else {
+                    stringResource(R.string.expense_format, transaction.amount.toString())
+                }
                 Text(
-                    text = "${if (transaction.type == TransactionType.INCOME) "+" else "-"}${transaction.amount} ₽",
+                    text = amountText,
                     color = if (transaction.type == TransactionType.INCOME) Color(0xFF2E7D32) else Color.Red,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
                 IconButton(onClick = { onDelete(transaction) }) {
-                    Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.Gray)
+                    Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete), tint = Color.Gray)
                 }
             }
         }
@@ -196,26 +204,26 @@ fun AddTransactionDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add Transaction") },
+        title = { Text(stringResource(R.string.add_transaction)) },
         text = {
             Column {
                 TextField(
                     value = amount,
                     onValueChange = { amount = it },
-                    label = { Text("Amount") },
+                    label = { Text(stringResource(R.string.amount)) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     RadioButton(selected = type == TransactionType.INCOME, onClick = { type = TransactionType.INCOME })
-                    Text("Income")
+                    Text(stringResource(R.string.income))
                     Spacer(modifier = Modifier.width(8.dp))
                     RadioButton(selected = type == TransactionType.EXPENSE, onClick = { type = TransactionType.EXPENSE })
-                    Text("Expense")
+                    Text(stringResource(R.string.expense))
                 }
                 
-                Text("Category:", style = MaterialTheme.typography.labelLarge)
+                Text(stringResource(R.string.category_label), style = MaterialTheme.typography.labelLarge)
                 if (categories.isEmpty()) {
-                    Text("Please add a category first", color = Color.Red)
+                    Text(stringResource(R.string.add_category_first), color = Color.Red)
                 } else {
                     ScrollableTabRow(selectedTabIndex = categories.indexOf(selectedCategory).coerceAtLeast(0)) {
                         categories.forEach { category ->
@@ -231,7 +239,7 @@ fun AddTransactionDialog(
                 TextField(
                     value = note,
                     onValueChange = { note = it },
-                    label = { Text("Note (optional)") },
+                    label = { Text(stringResource(R.string.note_optional)) },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -242,10 +250,10 @@ fun AddTransactionDialog(
                 onClick = { 
                     onConfirm(BigDecimal(amount), type, selectedCategory!!, note.ifBlank { null })
                 }
-            ) { Text("Add") }
+            ) { Text(stringResource(R.string.add)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
         }
     )
 }
@@ -259,12 +267,12 @@ fun AddCategoryDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add Category") },
+        title = { Text(stringResource(R.string.add_category)) },
         text = {
             TextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Category Name") },
+                label = { Text(stringResource(R.string.category_name)) },
                 modifier = Modifier.fillMaxWidth()
             )
         },
@@ -272,10 +280,10 @@ fun AddCategoryDialog(
             Button(
                 enabled = name.isNotBlank(),
                 onClick = { onConfirm(name) }
-            ) { Text("Add") }
+            ) { Text(stringResource(R.string.add)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
         }
     )
 }

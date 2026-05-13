@@ -1,5 +1,7 @@
 package com.moneykeeper.data.repository
 
+import android.content.Context
+import com.moneykeeper.R
 import com.moneykeeper.data.dao.CategoryDao
 import com.moneykeeper.data.dao.TransactionDao
 import com.moneykeeper.data.mapper.toDomain
@@ -13,8 +15,11 @@ import kotlinx.coroutines.flow.map
 
 class FundsRepositoryImpl(
     private val transactionDao: TransactionDao,
-    private val categoryDao: CategoryDao
+    private val categoryDao: CategoryDao,
+    private val context: Context
 ) : FundsRepository {
+
+    private val unknownCategoryName by lazy { context.getString(R.string.unknown_category) }
 
     override fun getAllTransactions(): Flow<List<FinancialTransaction>> {
         return combine(
@@ -24,7 +29,7 @@ class FundsRepositoryImpl(
             val categoryMap = categories.associateBy { it.id }
             transactions.map { entity ->
                 val categoryEntity = categoryMap[entity.categoryId]
-                val category = categoryEntity?.toDomain() ?: Category(name = "Unknown")
+                val category = categoryEntity?.toDomain() ?: Category(name = unknownCategoryName)
                 entity.toDomain(category)
             }
         }
@@ -33,7 +38,7 @@ class FundsRepositoryImpl(
     override suspend fun getTransactionById(id: Long): FinancialTransaction? {
         val entity = transactionDao.getTransactionById(id) ?: return null
         val categoryEntity = categoryDao.getCategoryById(entity.categoryId)
-        val category = categoryEntity?.toDomain() ?: Category(name = "Unknown")
+        val category = categoryEntity?.toDomain() ?: Category(name = unknownCategoryName)
         return entity.toDomain(category)
     }
 

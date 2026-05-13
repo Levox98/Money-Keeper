@@ -1,3 +1,23 @@
 <resources>
     <string name="app_name">Money Keeper</string>
+    <string name="add_transaction">Add Transaction</string>
+    <string name="add_category">Add Category</string>
+    <string name="cat_plus">Cat+</string>
+    <string name="recent_transactions">Recent Transactions</string>
+    <string name="total_balance">Total Balance</string>
+    <string name="delete">Delete</string>
+    <string name="amount">Amount</string>
+    <string name="income">Income</string>
+    <string name="expense">Expense</string>
+    <string name="category_label">Category:</string>
+    <string name="add_category_first">Please add a category first</string>
+    <string name="note_optional">Note (optional)</string>
+    <string name="add">Add</string>
+    <string name="cancel">Cancel</string>
+    <string name="category_name">Category Name</string>
+    <string name="unknown_category">Unknown</string>
+    <string name="currency_format">%s ₽</string>
+    <string name="income_format">+%s ₽</string>
+    <string name="expense_format">-%s ₽</string>
+    <string name="date_format">dd MMM, HH:mm</string>
 </resources>
