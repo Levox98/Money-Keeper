@@ -4,44 +4,46 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.runtime.remember
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.room.Room
+import com.moneykeeper.data.database.AppDatabase
+import com.moneykeeper.data.repository.FundsRepositoryImpl
+import com.moneykeeper.ui.screen.FundsScreen
 import com.moneykeeper.ui.theme.MoneyKeeperTheme
+import com.moneykeeper.ui.viewmodel.FundsViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            MoneyKeeperTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+        
+        // Simple manual DI for the sake of the task
+        val db = Room.databaseBuilder(
+            applicationContext,
+            AppDatabase::class.java, "money-keeper-db"
+        ).build()
+        
+        val repository = FundsRepositoryImpl(
+            transactionDao = db.transactionDao(),
+            categoryDao = db.categoryDao()
+        )
+        
+        val viewModelFactory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return FundsViewModel(repository) as T
             }
         }
-    }
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    MoneyKeeperTheme {
-        Greeting("Android")
+        enableEdgeToEdge()
+        setContent {
+            val viewModel = remember {
+                ViewModelProvider(this, viewModelFactory)[FundsViewModel::class.java]
+            }
+            
+            MoneyKeeperTheme {
+                FundsScreen(viewModel = viewModel)
+            }
+        }
     }
 }
