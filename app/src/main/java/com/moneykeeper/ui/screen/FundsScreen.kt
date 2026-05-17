@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -14,23 +15,50 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import com.moneykeeper.R
 import com.moneykeeper.domain.model.Category
 import com.moneykeeper.domain.model.FinancialTransaction
 import com.moneykeeper.domain.model.TransactionType
+import com.moneykeeper.ui.theme.MoneyKeeperTheme
 import com.moneykeeper.ui.viewmodel.FundsViewModel
 import java.math.BigDecimal
 import java.text.SimpleDateFormat
 import java.util.*
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FundsScreen(viewModel: FundsViewModel) {
     val transactions by viewModel.transactions.collectAsState()
     val categories by viewModel.categories.collectAsState()
-    
+
+    FundsScreenContent(
+        transactions = transactions,
+        categories = categories,
+        onAddTransaction = { amount, type, category, note ->
+            viewModel.addTransaction(amount, type, category, note)
+        },
+        onAddCategory = { name ->
+            viewModel.addCategory(name)
+        },
+        onDeleteTransaction = { transaction ->
+            viewModel.deleteTransaction(transaction)
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FundsScreenContent(
+    transactions: List<FinancialTransaction>,
+    categories: List<Category>,
+    onAddTransaction: (BigDecimal, TransactionType, Category, String?) -> Unit,
+    onAddCategory: (String) -> Unit,
+    onDeleteTransaction: (FinancialTransaction) -> Unit
+) {
     var showAddTransactionDialog by remember { mutableStateOf(value = false) }
     var showAddCategoryDialog by remember { mutableStateOf(value = false) }
+    var isFabExpanded by remember { mutableStateOf(false) }
+    var initialTransactionType by remember { mutableStateOf(TransactionType.EXPENSE) }
 
     val totalBalance = transactions.sumOf { 
         if (it.type == TransactionType.INCOME) it.amount else it.amount.negate()
@@ -42,14 +70,42 @@ fun FundsScreen(viewModel: FundsViewModel) {
         },
         floatingActionButton = {
             Column(horizontalAlignment = Alignment.End) {
-                SmallFloatingActionButton(
-                    onClick = { showAddCategoryDialog = true },
-                    modifier = Modifier.padding(bottom = 8.dp),
-                ) {
-                    Text(stringResource(R.string.cat_plus))
+                if (isFabExpanded) {
+                    ExtendedFloatingActionButton(
+                        text = { Text(stringResource(R.string.add_category)) },
+                        icon = { Icon(Icons.Default.Add, contentDescription = null) },
+                        onClick = {
+                            showAddCategoryDialog = true
+                            isFabExpanded = false
+                        },
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    ExtendedFloatingActionButton(
+                        text = { Text(stringResource(R.string.income)) },
+                        icon = { Icon(Icons.Default.Add, contentDescription = null) },
+                        onClick = {
+                            initialTransactionType = TransactionType.INCOME
+                            showAddTransactionDialog = true
+                            isFabExpanded = false
+                        },
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    ExtendedFloatingActionButton(
+                        text = { Text(stringResource(R.string.expense)) },
+                        icon = { Icon(Icons.Default.Add, contentDescription = null) },
+                        onClick = {
+                            initialTransactionType = TransactionType.EXPENSE
+                            showAddTransactionDialog = true
+                            isFabExpanded = false
+                        },
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
                 }
-                FloatingActionButton(onClick = { showAddTransactionDialog = true }) {
-                    Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_transaction))
+                FloatingActionButton(onClick = { isFabExpanded = !isFabExpanded }) {
+                    Icon(
+                        imageVector = if (isFabExpanded) Icons.Default.Close else Icons.Default.Add,
+                        contentDescription = stringResource(if (isFabExpanded) R.string.cancel else R.string.add_transaction)
+                    )
                 }
             }
         }
@@ -76,7 +132,7 @@ fun FundsScreen(viewModel: FundsViewModel) {
                 items(transactions) { transaction ->
                     TransactionItem(
                         transaction = transaction,
-                        onDelete = { viewModel.deleteTransaction(transaction) }
+                        onDelete = { onDeleteTransaction(transaction) }
                     )
                 }
             }
@@ -86,9 +142,10 @@ fun FundsScreen(viewModel: FundsViewModel) {
     if (showAddTransactionDialog) {
         AddTransactionDialog(
             categories = categories,
+            initialType = initialTransactionType,
             onDismiss = { showAddTransactionDialog = false },
             onConfirm = { amount, type, category, note ->
-                viewModel.addTransaction(amount, type, category, note)
+                onAddTransaction(amount, type, category, note)
                 showAddTransactionDialog = false
             }
         )
@@ -98,7 +155,7 @@ fun FundsScreen(viewModel: FundsViewModel) {
         AddCategoryDialog(
             onDismiss = { showAddCategoryDialog = false },
             onConfirm = { name ->
-                viewModel.addCategory(name)
+                onAddCategory(name)
                 showAddCategoryDialog = false
             }
         )
@@ -188,11 +245,12 @@ fun TransactionItem(
 @Composable
 fun AddTransactionDialog(
     categories: List<Category>,
+    initialType: TransactionType = TransactionType.EXPENSE,
     onDismiss: () -> Unit,
     onConfirm: (BigDecimal, TransactionType, Category, String?) -> Unit
 ) {
     var amount by remember { mutableStateOf("") }
-    var type by remember { mutableStateOf(TransactionType.EXPENSE) }
+    var type by remember { mutableStateOf(initialType) }
     var selectedCategory by remember { mutableStateOf(categories.firstOrNull()) }
     var note by remember { mutableStateOf("") }
     
@@ -286,4 +344,93 @@ fun AddCategoryDialog(
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
         }
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun BalanceCardPreview() {
+    MoneyKeeperTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            BalanceCard(balance = BigDecimal("1234.56"))
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun TransactionItemPreview() {
+    val sampleCategory = Category(id = 1L, name = "Food", iconResId = null, colorHex = null)
+    val sampleTransaction = FinancialTransaction(
+        id = 1L,
+        amount = BigDecimal("500.00"),
+        type = TransactionType.EXPENSE,
+        category = sampleCategory,
+        timestamp = System.currentTimeMillis(),
+        note = "Dinner at restaurant"
+    )
+    MoneyKeeperTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            TransactionItem(transaction = sampleTransaction, onDelete = {})
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun FundsScreenPreview() {
+    val sampleCategories = listOf(
+        Category(id = 1L, name = "Food", iconResId = null, colorHex = null),
+        Category(id = 2L, name = "Salary", iconResId = null, colorHex = null)
+    )
+    val sampleTransactions = listOf(
+        FinancialTransaction(
+            id = 1L,
+            amount = BigDecimal("1000.00"),
+            type = TransactionType.INCOME,
+            category = sampleCategories[1],
+            timestamp = System.currentTimeMillis(),
+            note = "Monthly salary"
+        ),
+        FinancialTransaction(
+            id = 2L,
+            amount = BigDecimal("150.50"),
+            type = TransactionType.EXPENSE,
+            category = sampleCategories[0],
+            timestamp = System.currentTimeMillis() - 86400000,
+            note = "Grocery store"
+        )
+    )
+    MoneyKeeperTheme {
+        FundsScreenContent(
+            transactions = sampleTransactions,
+            categories = sampleCategories,
+            onAddTransaction = { _, _, _, _ -> },
+            onAddCategory = {},
+            onDeleteTransaction = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AddTransactionDialogPreview() {
+    val sampleCategories = listOf(
+        Category(id = 1L, name = "Food", iconResId = null, colorHex = null),
+        Category(id = 2L, name = "Salary", iconResId = null, colorHex = null)
+    )
+    MoneyKeeperTheme {
+        AddTransactionDialog(
+            categories = sampleCategories,
+            onDismiss = {},
+            onConfirm = { _, _, _, _ -> }
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AddCategoryDialogPreview() {
+    MoneyKeeperTheme {
+        AddCategoryDialog(onDismiss = {}, onConfirm = {})
+    }
 }
