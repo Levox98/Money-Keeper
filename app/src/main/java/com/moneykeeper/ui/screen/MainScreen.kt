@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -13,7 +14,7 @@ import com.moneykeeper.R
 import com.moneykeeper.ui.viewmodel.FundsViewModel
 
 enum class Screen {
-    TRANSACTIONS, STATISTICS
+    TRANSACTIONS, STATISTICS, AI_ANALYSIS
 }
 
 @Composable
@@ -35,6 +36,12 @@ fun MainScreen(viewModel: FundsViewModel) {
                     icon = { Icon(Icons.Default.Info, contentDescription = null) },
                     label = { Text(stringResource(R.string.statistics)) }
                 )
+                NavigationBarItem(
+                    selected = currentScreen == Screen.AI_ANALYSIS,
+                    onClick = { currentScreen = Screen.AI_ANALYSIS },
+                    icon = { Icon(Icons.Default.Star, contentDescription = null) },
+                    label = { Text(stringResource(R.string.ai_analysis)) }
+                )
             }
         }
     ) { padding ->
@@ -42,6 +49,7 @@ fun MainScreen(viewModel: FundsViewModel) {
             when (currentScreen) {
                 Screen.TRANSACTIONS -> FundsScreen(viewModel = viewModel)
                 Screen.STATISTICS -> StatisticsScreen(viewModel = viewModel)
+                Screen.AI_ANALYSIS -> AIScreen(viewModel = viewModel)
             }
         }
     }

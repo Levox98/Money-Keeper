@@ -38,23 +38,16 @@ import com.moneykeeper.ui.theme.MoneyKeeperTheme
 import com.moneykeeper.ui.viewmodel.FundsViewModel
 import java.math.BigDecimal
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StatisticsScreen(viewModel: FundsViewModel) {
     val transactions by viewModel.transactions.collectAsState()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(title = { Text(stringResource(R.string.statistics)) })
-        }
-    ) { padding ->
-        StatisticsContent(
-            transactions = transactions,
-            modifier = Modifier.padding(padding)
-        )
-    }
+    StatisticsContent(
+        transactions = transactions,
+    )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StatisticsContent(
     transactions: List<FinancialTransaction>,
@@ -68,30 +61,42 @@ fun StatisticsContent(
 
     val totalExpenses = expensesByCategory.sumOf { it.second }
 
-    if (expenseTransactions.isEmpty()) {
-        Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(text = stringResource(R.string.no_expenses_yet))
+
+    Scaffold(
+        topBar = {
+            TopAppBar(title = { Text(stringResource(R.string.statistics)) })
         }
-    } else {
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            PieChart(
-                data = expensesByCategory,
-                total = totalExpenses,
-                modifier = Modifier
-                    .size(200.dp)
-                    .padding(16.dp)
-            )
+    ) { padding ->
+        if (expenseTransactions.isEmpty()) {
+            Box(
+                modifier = modifier
+                    .padding(padding)
+                    .fillMaxSize(), contentAlignment = Alignment.Center
+            ) {
+                Text(text = stringResource(R.string.no_expenses_yet))
+            }
+        } else {
+            Column(
+                modifier = modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                PieChart(
+                    data = expensesByCategory,
+                    total = totalExpenses,
+                    modifier = Modifier
+                        .size(200.dp)
+                        .padding(16.dp)
+                )
 
-            Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
-            LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                items(expensesByCategory) { (category, amount) ->
-                    CategoryExpenseItem(category, amount, totalExpenses)
+                LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                    items(expensesByCategory) { (category, amount) ->
+                        CategoryExpenseItem(category, amount, totalExpenses)
+                    }
                 }
             }
         }

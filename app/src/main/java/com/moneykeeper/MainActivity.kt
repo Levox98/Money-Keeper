@@ -10,6 +10,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.room.Room
 import com.moneykeeper.data.database.AppDatabase
 import com.moneykeeper.data.repository.FundsRepositoryImpl
+import com.moneykeeper.domain.ai.FinanceAIAnalyzer
+import com.moneykeeper.domain.usecase.AnalyzeFinancesUseCase
 import com.moneykeeper.ui.screen.MainScreen
 import com.moneykeeper.ui.theme.MoneyKeeperTheme
 import com.moneykeeper.ui.viewmodel.FundsViewModel
@@ -29,10 +31,13 @@ class MainActivity : ComponentActivity() {
             categoryDao = db.categoryDao(),
             context = applicationContext
         )
+
+        val aiAnalyzer = FinanceAIAnalyzer()
+        val analyzeUseCase = AnalyzeFinancesUseCase(repository, aiAnalyzer)
         
         val viewModelFactory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return FundsViewModel(repository) as T
+                return FundsViewModel(repository, analyzeUseCase) as T
             }
         }
 

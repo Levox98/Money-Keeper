@@ -22,5 +22,8 @@
     <string name="date_format">dd MMM, HH:mm</string>
     <string name="transactions">Transactions</string>
     <string name="statistics">Statistics</string>
+    <string name="ai_analysis">AI Analysis</string>
+    <string name="run_analysis">Run AI Analysis</string>
+    <string name="analyzing">Analyzing...</string>
     <string name="no_expenses_yet">No expenses yet</string>
 </resources>
