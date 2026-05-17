@@ -10,7 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.room.Room
 import com.moneykeeper.data.database.AppDatabase
 import com.moneykeeper.data.repository.FundsRepositoryImpl
-import com.moneykeeper.ui.screen.FundsScreen
+import com.moneykeeper.ui.screen.MainScreen
 import com.moneykeeper.ui.theme.MoneyKeeperTheme
 import com.moneykeeper.ui.viewmodel.FundsViewModel
 
@@ -43,7 +43,7 @@ class MainActivity : ComponentActivity() {
             }
             
             MoneyKeeperTheme {
-                FundsScreen(viewModel = viewModel)
+                MainScreen(viewModel = viewModel)
             }
         }
     }
