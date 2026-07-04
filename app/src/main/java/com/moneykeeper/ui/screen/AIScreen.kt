@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.moneykeeper.R
+import com.moneykeeper.ui.component.AiAnalysisResultCard
 import com.moneykeeper.ui.viewmodel.FundsViewModel
 
 @Composable
@@ -67,18 +68,7 @@ fun AIScreenContent(
             Spacer(modifier = Modifier.height(24.dp))
 
             if (aiAnalysis != null) {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
-                ) {
-                    Text(
-                        text = aiAnalysis,
-                        modifier = Modifier.padding(16.dp),
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                }
+                AiAnalysisResultCard(analysis = aiAnalysis)
             } else if (!isAnalyzing) {
                 Text(
                     text = "Нажмите на кнопку выше, чтобы ИИ проанализировал ваши финансы и дал советы.",
