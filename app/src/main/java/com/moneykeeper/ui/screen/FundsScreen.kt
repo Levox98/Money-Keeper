@@ -27,7 +27,7 @@ import com.moneykeeper.ui.viewmodel.FundsViewModel
 import java.math.BigDecimal
 
 @Composable
-fun FundsScreen(viewModel: FundsViewModel) {
+fun FundsScreen(viewModel: FundsViewModel, toAddTransaction: () -> Unit) {
     val transactions by viewModel.transactions.collectAsState()
     val categories by viewModel.categories.collectAsState()
 
@@ -42,7 +42,8 @@ fun FundsScreen(viewModel: FundsViewModel) {
         },
         onDeleteTransaction = { transaction ->
             viewModel.deleteTransaction(transaction)
-        }
+        },
+        toAddTransaction = toAddTransaction
     )
 }
 
@@ -53,7 +54,8 @@ fun FundsScreenContent(
     categories: List<Category>,
     onAddTransaction: (BigDecimal, TransactionType, Category, String?) -> Unit,
     onAddCategory: (String) -> Unit,
-    onDeleteTransaction: (FinancialTransaction) -> Unit
+    onDeleteTransaction: (FinancialTransaction) -> Unit,
+    toAddTransaction: () -> Unit = {}
 ) {
     var showAddTransactionDialog by remember { mutableStateOf(value = false) }
     var showAddCategoryDialog by remember { mutableStateOf(value = false) }
@@ -81,21 +83,11 @@ fun FundsScreenContent(
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
                     ExtendedFloatingActionButton(
-                        text = { Text(stringResource(R.string.income)) },
+                        text = { Text(stringResource(R.string.add_transaction)) },
                         icon = { Icon(Icons.Default.Add, contentDescription = null) },
                         onClick = {
                             initialTransactionType = TransactionType.INCOME
-                            showAddTransactionDialog = true
-                            isFabExpanded = false
-                        },
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                    ExtendedFloatingActionButton(
-                        text = { Text(stringResource(R.string.expense)) },
-                        icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                        onClick = {
-                            initialTransactionType = TransactionType.EXPENSE
-                            showAddTransactionDialog = true
+                            toAddTransaction()
                             isFabExpanded = false
                         },
                         modifier = Modifier.padding(bottom = 8.dp)
