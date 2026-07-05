@@ -15,6 +15,7 @@ import com.moneykeeper.domain.model.TransactionType
 import com.moneykeeper.ui.theme.MoneyKeeperTheme
 import java.math.BigDecimal
 
+// TODO: remove after finishing the 'add transaction' screen
 @Composable
 fun AddTransactionDialog(
     categories: List<Category>,

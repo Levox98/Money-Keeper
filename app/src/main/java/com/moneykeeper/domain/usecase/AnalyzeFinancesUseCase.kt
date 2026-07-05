@@ -8,6 +8,7 @@ class AnalyzeFinancesUseCase(
     private val repository: FundsRepository,
     private val analyzer: FinanceAIAnalyzer
 ) {
+    // TODO: check if I need this
     suspend fun execute(): Result<String> {
         return try {
             val transactions = repository.getAllTransactions().first()

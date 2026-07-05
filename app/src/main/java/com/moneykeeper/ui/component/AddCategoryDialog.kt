@@ -9,6 +9,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.moneykeeper.R
 import com.moneykeeper.ui.theme.MoneyKeeperTheme
 
+// TODO: replace this dialog with a separate screen
 @Composable
 fun AddCategoryDialog(
     onDismiss: () -> Unit,

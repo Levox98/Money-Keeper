@@ -1,4 +1,5 @@
 <resources>
+<!--    TODO: add localizable strings? -->
     <string name="app_name">Money Keeper</string>
     <string name="add_transaction">Add Transaction</string>
     <string name="add_category">Add Category</string>
@@ -24,6 +25,6 @@
     <string name="statistics">Statistics</string>
     <string name="ai_analysis">AI Analysis</string>
     <string name="run_analysis">Run AI Analysis</string>
-    <string name="analyzing">Analyzing...</string>
+    <string name="analyzing">Analyzing…</string>
     <string name="no_expenses_yet">No expenses yet</string>
 </resources>

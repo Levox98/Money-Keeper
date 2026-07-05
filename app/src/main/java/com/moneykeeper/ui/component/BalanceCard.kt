@@ -30,7 +30,7 @@ fun BalanceCard(balance: BigDecimal) {
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.Start
         ) {
             Text(stringResource(R.string.total_balance), style = MaterialTheme.typography.labelLarge)
             Text(
